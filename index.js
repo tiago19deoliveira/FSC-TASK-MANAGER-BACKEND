@@ -13,7 +13,7 @@ app.get("/tasks", async (req, res) => {
         const tasks = await TaskModel.find({});
         res.status(200).send(tasks);
     } catch (e) {
-        res.status(500).send(error.message);
+        return res.status(500).send(error.message);
     }
 });
 
@@ -26,9 +26,9 @@ app.get("/tasks/:id", async (req, res) => {
             return res.status(404).send("Essa tarefa não foi encontrada!");
         }
 
-        res.status(200).send(task);
+        return res.status(200).send(task);
     } catch (e) {
-        res.status(500).send(error.message);
+        return res.status(500).send(error.message);
     }
 });
 
@@ -38,7 +38,33 @@ app.post("/tasks", async (req, res) => {
         await newTask.save();
         res.status(201).send(newTask);
     } catch (error) {
-        res.status(400).send(error.message);
+        return res.status(400).send(error.message);
+    }
+});
+
+app.patch("/tasks/:id", async (req, res) => {
+    try {
+        const taskId = req.params.id;
+        const taskData = req.body;
+        const taskToUpdate = await TaskModel.findById(taskId);
+        const allowedupdates = ["isCompleted"];
+        const requestUpdates = Object.keys(taskData);
+
+        for (update of requestUpdates) {
+            if (allowedupdates.includes(update)) {
+                taskToUpdate[update] = taskData[update];
+            } else {
+                return res
+                    .status(400)
+                    .send("Um ou mais campos inseridos não são editáveis");
+            }
+        }
+
+        await taskToUpdate.save();
+
+        return res.status(200).send(taskToUpdate);
+    } catch (error) {
+        return res.status(500).send(error.message);
     }
 });
 
@@ -50,7 +76,7 @@ app.delete("/tasks/:id", async (req, res) => {
             return res.status(500).send("Essa tarefa não foi encontrada");
         }
         const deleteTask = await TaskModel.findByIdAndDelete(taskId);
-        res.status(200).send(deleteTask);
+        return res.status(200).send(deleteTask);
     } catch (error) {
         console.error(error.message);
     }
