@@ -5,32 +5,15 @@ const TaskController = require("../controller/task.controller");
 const TaskModel = require("../models/task.models");
 
 router.get("/", async (req, res) => {
-    return new TaskController(req, res).getTasks();
+    return new TaskController(req, res).getAll();
 });
 
-router.get("//:id", async (req, res) => {
-    try {
-        const taskId = req.params.id;
-        const task = await TaskModel.findById(taskId);
-
-        if (!task) {
-            return res.status(404).send("Essa tarefa não foi encontrada!");
-        }
-
-        return res.status(200).send(task);
-    } catch (e) {
-        return res.status(500).send(error.message);
-    }
+router.get("/:id", async (req, res) => {
+    return new TaskController(req, res).getbyId(id);
 });
 
 router.post("/", async (req, res) => {
-    try {
-        const newTask = new TaskModel(req.body);
-        await newTask.save();
-        res.status(201).send(newTask);
-    } catch (error) {
-        return res.status(400).send(error.message);
-    }
+    return new TaskController(req, res).create();
 });
 
 router.patch("/:id", async (req, res) => {
