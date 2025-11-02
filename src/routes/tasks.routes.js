@@ -8,7 +8,7 @@ router.get("/", async (req, res) => {
 });
 
 router.get("/:id", async (req, res) => {
-    return new TaskController(req, res).getbyId(id);
+    return new TaskController(req, res).getbyId();
 });
 
 router.post("/", async (req, res) => {

@@ -1,4 +1,6 @@
 const TaskModel = require("../models/task.models");
+const { notFoundError } = require("../errors/mongodb.errors");
+const { notAllowedFieldsToUpdate } = require("../errors/general.errors");
 
 class TaskController {
     constructor(req, res) {
@@ -9,7 +11,7 @@ class TaskController {
         try {
             const tasks = await TaskModel.find({});
             this.res.status(200).send(tasks);
-        } catch (e) {
+        } catch (error) {
             this.res.status(500).send(error.message);
         }
     }
@@ -20,13 +22,11 @@ class TaskController {
             const task = await TaskModel.findById(taskId);
 
             if (!task) {
-                return this.res
-                    .status(404)
-                    .send("Essa tarefa não foi encontrada!");
+                return notFoundError(this.res);
             }
 
             return this.res.status(200).send(task);
-        } catch (e) {
+        } catch (error) {
             return this.res.status(500).send(error.message);
         }
     }
@@ -44,6 +44,10 @@ class TaskController {
             const taskId = this.req.params.id;
             const taskData = this.req.body;
             const taskToUpdate = await TaskModel.findById(taskId);
+
+            if (!taskToUpdate) {
+                return notFoundError(this.res);
+            }
             const allowedupdates = ["isCompleted"];
             const requestUpdates = Object.keys(taskData);
 
@@ -51,9 +55,7 @@ class TaskController {
                 if (allowedupdates.includes(update)) {
                     taskToUpdate[update] = taskData[update];
                 } else {
-                    return this.res
-                        .status(400)
-                        .send("Um ou mais campos inseridos não são editáveis");
+                    return notAllowedFieldsToUpdate(this.res);
                 }
             }
 
@@ -69,9 +71,7 @@ class TaskController {
             const taskId = this.req.params.id;
             const taskToDelete = await TaskModel.findById(taskId);
             if (!taskToDelete) {
-                return this.res
-                    .status(500)
-                    .send("Essa tarefa não foi encontrada");
+                return notFoundError(this.res);
             }
             const deleteTask = await TaskModel.findByIdAndDelete(taskId);
             return this.res.status(200).send(deleteTask);
