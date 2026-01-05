@@ -3,7 +3,8 @@ const { Schema, model } = require("mongoose");
 const TaskSchema = Schema({
     description: {
         type: String,
-        required: false,
+        required: true,
+        default: "",
     },
     isCompleted: {
         type: Boolean,
