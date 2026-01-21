@@ -17,7 +17,7 @@ class TaskController {
         }
     }
 
-    async getbyId() {
+    async getById() {
         try {
             const taskId = this.req.params.id;
             const task = await TaskModel.findById(taskId);
